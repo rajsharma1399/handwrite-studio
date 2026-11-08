@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handwrite Studio A4 Pro - Production Ready</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Indie+Flower&family=Kalam:wght@300;400;700&family=Patrick+Hand&family=Sacramento&display=swap" rel="stylesheet">
+    
+    <!-- PDF.js for parsing PDF uploads -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+
+    <!-- Mammoth.js for parsing Word (.docx) uploads -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+    <!-- html2pdf.js for exporting PDF & PNG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        .font-caveat { font-family: 'Caveat', cursive, sans-serif; }
+        .font-indie { font-family: 'Indie Flower', cursive, sans-serif; }
+        .font-kalam { font-family: 'Kalam', cursive, sans-serif; }
+        .font-patrick { font-family: 'Patrick Hand', cursive, sans-serif; }
+        .font-sacramento { font-family: 'Sacramento', cursive, sans-serif; }
+
+        /* Exact A4 Page Dimensions in CSS (Aspect Ratio 1:1.414) */
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            max-width: 100%;
+            margin: 0 auto 2rem auto;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        @media print {
+            body { background: white; }
+            header, .no-print { display: none !important; }
+            .a4-page { box-shadow: none; margin: 0; page-break-after: always; }
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="bg-slate-900 border-b border-slate-800 py-4 px-6 shadow-md no-print">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 p-2.5 rounded-xl shadow-lg">
+                    <i class="fa-solid fa-pen-nib text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white">Handwrite Studio A4 Pro</h1>
+                    <p class="text-xs text-slate-400">Multi-page A4 realistic handwriting converter with advanced color and paper styles</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="exportImages()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-images"></i> Download All Pages (PNG)
+                </button>
+                <button onclick="exportPDF()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> Download PDF (A4)
+                </button>
+                <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium px-3 py-2 rounded-lg transition border border-slate-700">
+                    <i class="fa-solid fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Controls Column (Left) -->
+        <div class="lg:col-span-4 bg-slate-900/90 backdrop-blur border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col gap-5 h-fit no-print">
+            <h2 class="text-base font-semibold text-slate-200 border-b border-slate-800 pb-3 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-indigo-400"></i> Document & Styling Controls
+            </h2>
+
+            <!-- Real Handwriting Cloner -->
+            <div class="bg-indigo-950/40 border border-indigo-500/30 p-3.5 rounded-xl flex flex-col gap-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-indigo-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-signature"></i> Real Handwriting Cloner
+                    </span>
+                    <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded">Optional</span>
+                </div>
+                <label class="border border-dashed border-indigo-500/50 hover:border-indigo-400 bg-slate-950/60 rounded-lg p-2 text-center cursor-pointer transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-camera-retro text-indigo-400 text-xs"></i>
+                    <span class="text-xs text-slate-300 font-medium truncate" id="handwriting-upload-label">Upload your handwriting sample (.png/.jpg)</span>
+                    <input type="file" id="handwriting-cloner-input" accept="image/*" class="hidden" onchange="handleHandwritingCloner(event)">
+                </label>
+                <div id="cloner-preview-container" class="hidden flex items-center justify-between bg-slate-950 p-2 rounded border border-slate-800">
+                    <span class="text-[11px] text-emerald-400 font-medium flex items-center gap-1.5"><i class="fa-solid fa-check-circle"></i> Cloned Style Active</span>
+                    <button onclick="removeCustomHandwriting()" class="text-[10px] text-red-400 hover:underline">Remove</button>
+                </div>
+            </div>
+
+            <!-- File Upload Box (PDF, Word, TXT) -->
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-medium text-slate-300">Upload Book / Document / Notes</label>
+                <label class="border-2 border-dashed border-slate-700 hover:border-indigo-500 bg-slate-950/50 rounded-xl p-3 text-center cursor-pointer transition flex flex-col items-center justify-center gap-1">
+                    <i class="fa-solid fa-cloud-arrow-up text-indigo-400 text-lg"></i>
+                    <span class="text-xs text-slate-300 font-medium truncate" id="upload-label">Upload PDF, Word (.docx), or Text</span>
+                    <input type="file" id="file-uploader" accept=".pdf,.docx,.txt" class="hidden" onchange="handleFileUpload(event)">
+                </label>
+            </div>
+
+            <!-- Text Input / Copy Paste Area -->
+            <div class="flex flex-col gap-1.5">
+                <div class="flex justify-between items-center">
+                    <label for="user-text" class="text-xs font-medium text-slate-300">Text Content (Copy & Paste / Edit)</label>
+                    <button onclick="clearText()" class="text-xs text-slate-400 hover:text-red-400 transition">Clear</button>
+                </div>
+                <textarea id="user-text" rows="5" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition resize-y leading-relaxed" placeholder="Type or paste your book chapters, assignments, or notes here..." oninput="generateNotes()">Chapter 1: The Foundations of Human Knowledge
+
+The art of authentic handwritten notes carries cognitive depth and warmth that typed digital fonts simply cannot replace. Every curve, stroke variation, and baseline jitter creates a deeply personal connection.
+
+Students often convert long book chapters, historical essays, and mathematical summaries into clean handwritten format to enhance retention and meet assignment criteria with absolute precision.</textarea>
+            </div>
+
+            <!-- Customization Grid -->
+            <div class="grid grid-cols-2 gap-3">
+                <!-- Handwriting Style -->
+                <div class="flex flex-col gap-1">
+                    <label class="text-[11px] font-medium text-slate-300">Handwriting Style</label>
+                    <select id="font-family" onchange="generateNotes()" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <option value="font-caveat">Caveat (Casual Cursive)</option>
+                        <option value="font-kalam">Kalam (Indian Script)</option>
+                        <option value="font-indie">Indie Flower (Neat Print)</option>
+                        <option value="font-patrick">Patrick Hand (Clean)</option>
+                        <option value="font-sacramento">Sacramento (Flowing)</option>
+                    </select>
+                </div>
+
+                <!-- Font Size -->
+                <div class="flex flex-col gap-1">
+                    <label class="text-[11px] font-medium text-slate-300">Font Size: <span id="font-size-val">22</span>px</label>
+                    <input type="range" id="font-size" min="16" max="30" value="22" oninput="updateVal('font-size', 'font-size-val'); generateNotes()" class="accent-indigo-500 mt-2">
+                </div>
+
+                <!-- Ink Color -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-medium text-slate-300">Pen Ink Color</label>
+                    <select id="ink-color" onchange="generateNotes()" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <option value="#1e3a8a">Royal Blue Pen</option>
+                        <option value="#0f172a">Classic Black Pen</option>
+                        <option value="#991b1b">Dark Red Pen</option>
+                        <option value="#065f46">Emerald Green Pen</option>
+                        <option value="#581c87">Purple Pen</option>
+                        <option value="#334155">Graphite Pencil</option>
+                    </select>
+                </div>
+
+                <!-- Paper Background -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-medium text-slate-300">A4 Paper Type</label>
+                    <select id="paper-bg" onchange="generateNotes()" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <option value="lined">Lined Notebook</option>
+                        <option value="grid">Grid / Graph Paper</option>
+                        <option value="legal">Legal Pad (Yellow)</option>
+                        <option value="blank">Plain White A4</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Advanced Human Imperfections -->
+            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 flex flex-col gap-2.5">
+                <span class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i> Human Imperfection Engine
+                </span>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] text-slate-400">Line Spacing: <span id="line-height-val">42</span>px</label>
+                        <input type="range" id="line-height" min="34" max="56" value="42" oninput="updateVal('line-height', 'line-height-val'); generateNotes()" class="accent-indigo-500">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] text-slate-400">Baseline Jitter: <span id="jitter-val">1.2</span>px</label>
+                        <input type="range" id="jitter" min="0" max="3" step="0.2" value="1.2" oninput="updateVal('jitter', 'jitter-val'); generateNotes()" class="accent-indigo-500">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Column (Right) - Multiple A4 Pages Container -->
+        <div class="lg:col-span-8 flex flex-col gap-4">
+            <div class="flex justify-between items-center px-1 no-print">
+                <span class="text-xs font-medium text-slate-400 flex items-center gap-2">
+                    <i class="fa-solid fa-file-lines text-indigo-400"></i> A4 Page-by-Page Live Preview
+                </span>
+                <span class="text-xs bg-indigo-900/50 text-indigo-300 border border-indigo-500/30 px-3 py-1 rounded-full font-medium" id="page-count-badge">Total Pages: 1</span>
+            </div>
+
+            <!-- Container where A4 sheets are dynamically generated -->
+            <div id="a4-container" class="flex flex-col items-center gap-6 overflow-auto p-4 bg-slate-900/40 rounded-2xl border border-slate-800 shadow-inner min-h-[750px]">
+                <!-- Pages get injected here -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Application Script -->
+    <script>
+        let customHandwritingImage = null;
+
+        function updateVal(sliderId, valId) {
+            document.getElementById(valId).innerText = document.getElementById(sliderId).value;
+        }
+
+        function handleHandwritingCloner(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                customHandwritingImage = e.target.result;
+                document.getElementById('handwriting-upload-label').innerText = `Loaded: ${file.name}`;
+                document.getElementById('cloner-preview-container').classList.remove('hidden');
+                generateNotes();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeCustomHandwriting() {
+            customHandwritingImage = null;
+            document.getElementById('handwriting-upload-label').innerText = 'Upload your handwriting sample (.png/.jpg)';
+            document.getElementById('cloner-preview-container').classList.add('hidden');
+            document.getElementById('handwriting-cloner-input').value = '';
+            generateNotes();
+        }
+
+        function paginateText(text, maxCharsPerPage = 850) {
+            if (!text) return [""];
+            const words = text.split(' ');
+            let pages = [];
+            let currentPage = "";
+
+            for (let word of words) {
+                if ((currentPage + " " + word).length > maxCharsPerPage) {
+                    pages.push(currentPage.trim());
+                    currentPage = word;
+                } else {
+                    currentPage += (currentPage === "" ? "" : " ") + word;
+                }
+            }
+            if (currentPage.trim() !== "") {
+                pages.push(currentPage.trim());
+            }
+            return pages.length > 0 ? pages : [""];
+        }
+
+        function generateNotes() {
+            const fullText = document.getElementById('user-text').value;
+            const container = document.getElementById('a4-container');
+            const fontFamily = document.getElementById('font-family').value;
+            const fontSize = document.getElementById('font-size').value + 'px';
+            const inkColor = document.getElementById('ink-color').value;
+            const lineHeight = document.getElementById('line-height').value + 'px';
+            const jitterVal = parseFloat(document.getElementById('jitter').value);
+            const paperType = document.getElementById('paper-bg').value;
+
+            const pages = paginateText(fullText);
+            document.getElementById('page-count-badge').innerText = `Total Pages: ${pages.length}`;
+
+            container.innerHTML = '';
+
+            pages.forEach((pageText, pageIndex) => {
+                const sheet = document.createElement('div');
+                sheet.className = 'a4-page p-12 rounded-sm';
+                
+                const patternDiv = document.createElement('div');
+                patternDiv.className = 'absolute inset-0 pointer-events-none';
+
+                if (paperType === 'lined') {
+                    sheet.style.backgroundColor = '#fbf9f1';
+                    patternDiv.style.backgroundImage = `linear-gradient(to bottom, transparent ${parseInt(lineHeight)-2}px, rgba(59, 130, 246, 0.25) ${parseInt(lineHeight)-1}px)`;
+                    patternDiv.style.backgroundSize = `100% ${lineHeight}`;
+                } else if (paperType === 'grid') {
+                    sheet.style.backgroundColor = '#fbf9f1';
+                    patternDiv.style.backgroundImage = `linear-gradient(to right, rgba(59, 130, 246, 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(59, 130, 246, 0.15) 1px, transparent 1px)`;
+                    patternDiv.style.backgroundSize = `28px 28px`;
+                } else if (paperType === 'legal') {
+                    sheet.style.backgroundColor = '#fefce8';
+                    patternDiv.style.backgroundImage = `linear-gradient(to right, rgba(239, 68, 68, 0.4) 1px, transparent 1px), linear-gradient(to bottom, transparent ${parseInt(lineHeight)-2}px, rgba(59, 130, 246, 0.25) ${parseInt(lineHeight)-1}px)`;
+                    patternDiv.style.backgroundSize = `50px 100%, 100% ${lineHeight}`;
+                } else {
+                    sheet.style.backgroundColor = '#ffffff';
+                    patternDiv.style.backgroundImage = 'none';
+                }
+                sheet.appendChild(patternDiv);
+
+                const contentDiv = document.createElement('div');
+                contentDiv.className = `relative z-10 w-full whitespace-pre-wrap ${fontFamily}`;
+                contentDiv.style.fontSize = fontSize;
+                contentDiv.style.color = inkColor;
+                contentDiv.style.lineHeight = lineHeight;
+
+                for (let i = 0; i < pageText.length; i++) {
+                    let char = pageText[i];
+                    if (char === '\n') {
+                        contentDiv.appendChild(document.createElement('br'));
+                        continue;
+                    }
+                    
+                    let span = document.createElement('span');
+                    if (customHandwritingImage && char !== ' ') {
+                        span.style.display = 'inline-block';
+                        span.style.width = '14px';
+                        span.style.height = '26px';
+                        span.style.backgroundImage = `url(${customHandwritingImage})`;
+                        span.style.backgroundSize = 'cover';
+                        span.style.marginRight = '1px';
+                    } else {
+                        span.innerText = char === ' ' ? '\u00A0' : char;
+                        span.style.display = 'inline-block';
+                    }
+
+                    if (jitterVal > 0 && char !== ' ') {
+                        let randomY = (Math.random() - 0.5) * jitterVal * 1.5;
+                        let randomRot = (Math.random() - 0.5) * jitterVal * 1.2;
+                        span.style.transform = `translateY(${randomY}px) rotate(${randomRot}deg)`;
+                    }
+                    contentDiv.appendChild(span);
+                }
+
+                sheet.appendChild(contentDiv);
+
+                const footerDiv = document.createElement('div');
+                footerDiv.className = 'relative z-10 flex justify-between items-center text-xs text-slate-500 font-sans pt-8 opacity-70 border-t border-slate-300/40 mt-auto';
+                footerDiv.innerHTML = `<span>Handwritten Notes</span> <span>Page ${pageIndex + 1} of ${pages.length}</span>`;
+                sheet.appendChild(footerDiv);
+
+                container.appendChild(sheet);
+            });
+        }
+
+        function clearText() {
+            document.getElementById('user-text').value = '';
+            generateNotes();
+        }
+
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('upload-label').innerText = `Loaded: ${file.name}`;
+            const fileName = file.name.toLowerCase();
+
+            try {
+                if (fileName.endsWith('.txt')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('user-text').value = e.target.result;
+                        generateNotes();
+                    };
+                    reader.readAsText(file);
+                } 
+                else if (fileName.endsWith('.docx')) {
+                    const reader = new FileReader();
+                    reader.onload = async function(e) {
+                        const arrayBuffer = e.target.result;
+                        const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+                        document.getElementById('user-text').value = result.value;
+                        generateNotes();
+                    };
+                    reader.readAsArrayBuffer(file);
+                } 
+                else if (fileName.endsWith('.pdf')) {
+                    const reader = new FileReader();
+                    reader.onload = async function(e) {
+                        const typedarray = new Uint8Array(e.target.result);
+                        const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                        let extractedText = "";
+
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const textContent = await page.getTextContent();
+                            const pageText = textContent.items.map(item => item.str).join(' ');
+                            extractedText += `\n\n[Page ${i}]\n` + pageText;
+                        }
+
+                        document.getElementById('user-text').value = extractedText;
+                        generateNotes();
+                    };
+                    reader.readAsArrayBuffer(file);
+                }
+            } catch (err) {
+                alert("Error reading file. Please paste your text directly.");
+                console.error(err);
+            }
+        }
+
+        function exportPDF() {
+            const element = document.getElementById('a4-container');
+            const opt = {
+                margin: 0,
+                filename: 'handwritten-notes-a4.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().from(element).set(opt).save();
+        }
+
+        async function exportImages() {
+            const pages = document.querySelectorAll('.a4-page');
+            pages.forEach((page, index) => {
+                const opt = {
+                    margin: 0,
+                    filename: `handwritten-page-${index + 1}.png`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, logging: false },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                html2pdf().from(page).set(opt).save();
+            });
+        }
+
+        window.onload = function() {
+            generateNotes();
+        };
+    </script>
+</body>
+</html>
